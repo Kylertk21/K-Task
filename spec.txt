@@ -1,0 +1,41 @@
+K-Task outline
+
+Functions:
+    Basic: Add, search, and delete tasks
+    Advanced: Add tasks to google calendar, create tasks from tickets, send reminders about tickets
+
+Decomposition:
+    Task?: Name, Description, Priority, Due Date
+    Storage Type?: Hash map? Hash Table? Database?
+    Interface:
+        Simple: CLI
+        Advanced: GUI
+
+Program Logic:
+    User starts program
+    Prompt opens with list of commands (help)
+    User selects command
+        Selections: add task, delete task, edit task
+        -> add task: prompt for task name, description, priority, and due date
+           technical details: entry is keyed by name, values are description, priority, and due date
+        -> search task: prompt for task name
+           technical details: hash function employed to retrieve key, if found, display task
+           if not, display not found error
+        -> delete task: prompt for task name
+           technical details: hash function employed to retrieve key, if found, ask for verification,
+           then dereference key if y is struck, if not, display not found error
+
+Psuedocode:
+    public class data
+            name
+            description
+            priority
+            due date
+
+    public data()
+        name = null
+        description = null
+        priority = 0
+        due date = 0
+
+
