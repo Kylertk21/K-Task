@@ -13,13 +13,13 @@ public:
     string name;
     string description;
     bool complete;
-    int priority;
+    string priority;
     string due_date; // TODO: convert to chrono::time
     Data() {
         name = "";
         description = "";
         complete = false;
-        priority = 0;
+        priority = "0";
         due_date = "";
     }
 
@@ -27,7 +27,12 @@ public:
         const Data* data_to_print = passed_data;
         cout << "Name: " << data_to_print->name << endl;
         cout << "Description: " << data_to_print->description << endl;
-        cout << "Complete: " << data_to_print->complete << endl;
+        if (data_to_print->complete == 1) {
+            cout << "Complete: True" << endl;
+        } else {
+            cout << "Complete: False" << endl;
+        }
+
         cout << "Priority: " << data_to_print->priority << endl;
         cout << "Due Date: " << data_to_print->due_date << endl;
     }
@@ -36,7 +41,7 @@ public:
 unordered_map<string, Data> tasks;
 
 void add_record(const string &name, const string &description, const bool complete, // add data struct to hash map
-                const int priority, const string &due_date) {
+                const string priority, const string &due_date) {
     Data new_task;
     new_task.name = name;
     new_task.description = description;
@@ -57,6 +62,7 @@ void delete_record(const string& query) {
         choice = static_cast<char>(tolower(static_cast<unsigned char>(choice))); // converts char to lowercase with safety typecasting
         if (choice == 'y') {
             tasks.erase(search);
+            cout << "Deleted Task" << endl;
         }
     }
 }
@@ -73,16 +79,67 @@ chrono::system_clock::time_point convert_time(string time) {
     return chrono::system_clock::now();
 }
 
-int main() {
-    add_record("test", "desc", true, 2, "12/02/2022");
-    const Data *query_data = search_records("test");
-    Data::print_data(query_data);
+void display_help() {
+    cout << "Welcome to K-Task, Type:     \n"
+            "--> add to add a task        \n"
+            "--> del to delete a task     \n"
+            "--> ser to search for a task \n";
+}
 
-    delete_record("test");
-    Data::print_data(query_data);
+[[noreturn]] int main() {
+    display_help();
+    string choice;
+    while (true) {
+        cout << "K-Task: ";
+        cin >> choice;
+        if (choice == "add") {
+            cout << "Enter Task Name: ";
+            string name;
+            cin >> name;
+
+            cout << "Enter Description: ";
+            string description;
+            cin >> description;
+
+            cout << "Enter Priority: ";
+            string priority;
+            cin >> priority;
+
+            cout << "Enter Date Due: ";
+            string due_date;
+            cin >> due_date;
+
+            add_record(name, description, false, priority, due_date);
+
+            const Data* test_query = search_records(name);
+            Data::print_data(test_query);
 
 
-    return 0;
+        } else if (choice == "del") {
+            cout << "Enter Task To Delete: ";
+            string choice_delete;
+            cin >> choice_delete;
+
+            delete_record(choice_delete);
+
+        } else if (choice == "ser") {
+            cout << "Enter Task Name: ";
+            string choice_search;
+            cin >> choice_search;
+
+            Data::print_data(search_records(choice_search));
+
+
+        } else if (choice == "help") {
+            display_help();
+        } else {
+            cout << "Invalid Command, Type 'help' For Help" << endl;
+        }
+
+
+
+
+    }
 }
 
 

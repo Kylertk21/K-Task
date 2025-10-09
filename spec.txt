@@ -15,7 +15,7 @@ Program Logic:
     User starts program
     Prompt opens with list of commands (help)
     User selects command
-        Selections: add task, delete task, edit task
+        Selections: add task, delete task, edit task, complete task
         -> add task: prompt for task name, description, priority, and due date
            technical details: entry is keyed by name, values are description, priority, and due date
         -> search task: prompt for task name
@@ -24,6 +24,8 @@ Program Logic:
         -> delete task: prompt for task name
            technical details: hash function employed to retrieve key, if found, ask for verification,
            then dereference key if y is struck, if not, display not found error
+        -> complete task: prompt for task name
+           technical details: change completion status to true
 
 Psuedocode:
     public class data
