@@ -119,9 +119,13 @@ void display_help() {
             cout << "Enter Date Due: ";
             string date;
             cin >> date;
-            time_t due_date = convert_time(date);
 
-            add_record(name, description, false, priority, due_date);
+            if (convert_time(date) != 1) {
+                time_t due_date = convert_time(date);
+                add_record(name, description, false, priority, due_date);
+            } else {
+                continue;
+            }
 
             const Data* test_query = search_records(name);
             Data::print_data(test_query);
