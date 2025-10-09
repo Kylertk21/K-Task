@@ -38,4 +38,31 @@ Psuedocode:
         priority = 0
         due date = 0
 
+    add_record(name, description, priority, due_date)
+        hash table
+            for i in range hash table size
+            if id is not in hash table:
+                key = id
+                value = name, description, priority, due_date
+
+    search_records(query)
+        for i in range hash table size
+            hash search method
+            if query == value
+                return key
+            else
+                print(none found!)
+                return None
+
+
+    delete_record(query)
+        for i in range hash table size
+            hash search method
+            if query == value
+                key = Null
+            else
+                print(none found!)
+
+
+
 
