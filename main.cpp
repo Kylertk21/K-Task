@@ -1,11 +1,12 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <chrono>
 #include <random>
 #include <ranges>
 #include <cctype>
-
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 using namespace std;
 
 class Data {
@@ -14,13 +15,13 @@ public:
     string description;
     bool complete;
     string priority;
-    string due_date; // TODO: convert to chrono::time
+    time_t due_date;
     Data() {
         name = "";
         description = "";
         complete = false;
         priority = "0";
-        due_date = "";
+        due_date = time(nullptr);
     }
 
     static void print_data(const Data* passed_data) {
@@ -41,7 +42,7 @@ public:
 unordered_map<string, Data> tasks;
 
 void add_record(const string &name, const string &description, const bool complete, // add data struct to hash map
-                const string priority, const string &due_date) {
+                const string &priority, const time_t &due_date) {
     Data new_task;
     new_task.name = name;
     new_task.description = description;
@@ -74,9 +75,19 @@ Data* search_records(const string& query) {
     return nullptr;
 }
 
-chrono::system_clock::time_point convert_time(string time) {
+time_t convert_time(const string& time) {
+    tm converted_time = {};
+    istringstream ss(time);
+    ss >> get_time(&converted_time, "%m/%d/%Y");
 
-    return chrono::system_clock::now();
+    if (ss.fail()) {
+        cerr << "Invalid Format For Date, Use MM/DD/YYYY" << endl;
+        return 1;
+    }
+
+    const time_t date = mktime(&converted_time);
+
+    return date;
 }
 
 void display_help() {
@@ -106,8 +117,9 @@ void display_help() {
             cin >> priority;
 
             cout << "Enter Date Due: ";
-            string due_date;
-            cin >> due_date;
+            string date;
+            cin >> date;
+            time_t due_date = convert_time(date);
 
             add_record(name, description, false, priority, due_date);
 
