@@ -27,16 +27,20 @@ Program Logic:
 
 Psuedocode:
     public class data
-            name
-            description
-            priority
-            due date
+            string name
+            string description
+            bool complete
+            int priority
+            time_point due date
 
     public data()
         name = null
         description = null
+        complete = false
         priority = 0
         due date = 0
+
+    hash_map stor
 
     add_record(name, description, priority, due_date)
         hash table
@@ -63,6 +67,17 @@ Psuedocode:
             else
                 print(none found!)
 
+    convert_time(time)
+        if time is in format 00/00/00
+            time = time point
+        else
+            print invalid message
+        return time
+
+    main()
+        Display help
+        program loop:
+            REPL
 
 
 
