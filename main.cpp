@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <ranges>
+#include <cctype>
 
 using namespace std;
 
@@ -21,11 +22,20 @@ public:
         priority = 0;
         due_date = "";
     }
+
+    static void print_data(const Data* passed_data) {
+        const Data* data_to_print = passed_data;
+        cout << "Name: " << data_to_print->name << endl;
+        cout << "Description: " << data_to_print->description << endl;
+        cout << "Complete: " << data_to_print->complete << endl;
+        cout << "Priority: " << data_to_print->priority << endl;
+        cout << "Due Date: " << data_to_print->due_date << endl;
+    }
 };
 
 unordered_map<string, Data> tasks;
 
-void add_record(const string &name, const string &description, const bool complete,
+void add_record(const string &name, const string &description, const bool complete, // add data struct to hash map
                 const int priority, const string &due_date) {
     Data new_task;
     new_task.name = name;
@@ -38,13 +48,22 @@ void add_record(const string &name, const string &description, const bool comple
 
 }
 
-void delete_record(string query) {
-
+void delete_record(const string& query) {
+    if (const auto search = tasks.find(query); search != tasks.end()) { // remove data struct from hash map
+        cout << "Found: " << search->first << endl;
+        cout << "Are you sure you want to delete? (Y/N): ";
+        char choice;
+        cin >> choice;
+        choice = static_cast<char>(tolower(static_cast<unsigned char>(choice))); // converts char to lowercase with safety typecasting
+        if (choice == 'y') {
+            tasks.erase(search);
+        }
+    }
 }
 
-Data* search_records(string query) {
-    if (auto search = tasks.find(query); search != tasks.end()) {
-        return &search->second;
+Data* search_records(const string& query) {
+    if (const auto search = tasks.find(query); search != tasks.end()) { // store found container in search
+        return &search->second; // access data field
     }
     return nullptr;
 }
@@ -57,11 +76,11 @@ chrono::system_clock::time_point convert_time(string time) {
 int main() {
     add_record("test", "desc", true, 2, "12/02/2022");
     const Data *query_data = search_records("test");
-    cout << "Name: " << query_data->name << endl;
-    cout << "Description: " << query_data->description << endl;
-    cout << "Complete: " << query_data->complete << endl;
-    cout << "Priority: " << query_data->priority << endl;
-    cout << "Due Date: " << query_data->due_date << endl;
+    Data::print_data(query_data);
+
+    delete_record("test");
+    Data::print_data(query_data);
+
 
     return 0;
 }
