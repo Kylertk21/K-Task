@@ -45,6 +45,50 @@ public:
     }
 };
 
+struct Node {
+    Data task;
+    Node* next{};
+    Node* prev{};
+
+    Node(Data task) {
+        this->task = task;
+        this->next = nullptr;
+        this->prev = nullptr;
+
+    }
+};
+
+void insert_node_beginning(Node*& head, Data task) {
+    Node* new_node = new Node(task);
+
+    if (head == nullptr) { // check if empty
+        head == new_node;
+        return;
+    }
+
+    new_node->next = head; // update next and prev pointers to insert the new node at the beginning
+    head->prev = new_node;
+    head = new_node;
+}
+
+void insert_node_end(Node*& head, Data task) {
+    Node* new_node = new Node(task);
+
+    if (head == new_node) {
+        head == new_node;
+        return;
+    }
+
+    Node* temp = head; // traverse to last node of list
+    while (temp->next != nullptr) {
+        temp = temp->next;
+    }
+
+    temp->next
+
+
+}
+
 unordered_map<string, Data> tasks;
 
 void add_record(const string &name, const string &description, const bool complete, // add data struct to hash map
@@ -77,6 +121,16 @@ void delete_record(const string& query) {
 optional<Data> search_records(const string& query) {
     if (const auto search = tasks.find(query); search != tasks.end()) { // store found container in search
         return search->second; // access data field
+    }
+    return nullopt;
+}
+
+optional<Node> list_records() {
+    cout << "Listing tasks..." << endl;
+    if (!tasks.empty()) {
+        for (const auto &name: tasks | views::keys) {
+            cout << name << endl;
+        }
     }
     return nullopt;
 }
@@ -179,12 +233,7 @@ void display_help() {
             Data::print_data(*search_records(choice_complete));
 
         } else if (choice == "list") {
-            cout << "Listing tasks..." << endl;
-            if (!tasks.empty()) {
-                for (const auto &name: tasks | views::keys) {
-                    cout << name << endl;
-                }
-            }
+
         }
 
         else if (choice == "help") {
