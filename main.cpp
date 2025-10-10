@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <optional>
+
 using namespace std;
 
 class Data {
@@ -24,18 +26,22 @@ public:
         due_date = time(nullptr);
     }
 
-    static void print_data(const Data* passed_data) {
-        const Data* data_to_print = passed_data;
-        cout << "Name: " << data_to_print->name << endl;
-        cout << "Description: " << data_to_print->description << endl;
-        if (data_to_print->complete == 1) {
+    static void print_data(const Data& passed_data) {
+        const Data& data_to_print = passed_data;
+        cout << "Name: " << data_to_print.name << endl;
+        cout << "Description: " << data_to_print.description << endl;
+        if (data_to_print.complete == 1) {
             cout << "Complete: True" << endl;
         } else {
             cout << "Complete: False" << endl;
         }
 
-        cout << "Priority: " << data_to_print->priority << endl;
-        cout << "Due Date: " << data_to_print->due_date << endl;
+        cout << "Priority: " << data_to_print.priority << endl;
+
+        char buffer[80];
+        const tm* timeinfo = localtime(&data_to_print.due_date);
+        strftime(buffer, sizeof(buffer), "%m/%d/%Y", timeinfo);
+        cout << "Due Date: " << buffer << endl;
     }
 };
 
@@ -68,33 +74,54 @@ void delete_record(const string& query) {
     }
 }
 
-Data* search_records(const string& query) {
+optional<Data> search_records(const string& query) {
     if (const auto search = tasks.find(query); search != tasks.end()) { // store found container in search
-        return &search->second; // access data field
+        return search->second; // access data field
     }
-    return nullptr;
+    return nullopt;
 }
 
-time_t convert_time(const string& time) {
+optional<time_t> convert_time(const string& time) {
     tm converted_time = {};
     istringstream ss(time);
     ss >> get_time(&converted_time, "%m/%d/%Y");
 
     if (ss.fail()) {
-        cerr << "Invalid Format For Date, Use MM/DD/YYYY" << endl;
-        return 1;
+        return nullopt;
+    }
+
+    if (converted_time.tm_mon < 0 || converted_time.tm_mon > 11 || // validate format
+        converted_time.tm_mday < 1 || converted_time.tm_mday > 31 ||
+        converted_time.tm_year < 0) {
+        return nullopt;
     }
 
     const time_t date = mktime(&converted_time);
 
+    if (const tm* verified = localtime(&date); verified->tm_mday != converted_time.tm_mday ||
+                                               verified->tm_mon != converted_time.tm_mon ||
+                                               verified->tm_year != converted_time.tm_year) {
+        return nullopt;
+    }
+
+
     return date;
 }
 
+void mark_complete(const string& query) {
+    if (const auto search = tasks.find(query); search != tasks.end()) {
+         search->second.complete = true;
+    } else {
+        cout << query << " Not Found!";
+    }
+}
+
 void display_help() {
-    cout << "Welcome to K-Task, Type:     \n"
-            "--> add to add a task        \n"
-            "--> del to delete a task     \n"
-            "--> ser to search for a task \n";
+    cout << "Welcome to K-Task, Type:           \n"
+            "--> add to add a task              \n"
+            "--> del to delete a task           \n"
+            "--> ser to search for a task       \n"
+            "--> com to mark a task as complete \n";
 }
 
 [[noreturn]] int main() {
@@ -120,16 +147,12 @@ void display_help() {
             string date;
             cin >> date;
 
-            if (convert_time(date) != 1) {
-                time_t due_date = convert_time(date);
+            if (convert_time(date) != nullopt) {
+                time_t due_date = convert_time(date).value();
                 add_record(name, description, false, priority, due_date);
             } else {
-                continue;
+                cerr << "Invalid Format For Date, Use MM/DD/YYYY" << endl;
             }
-
-            const Data* test_query = search_records(name);
-            Data::print_data(test_query);
-
 
         } else if (choice == "del") {
             cout << "Enter Task To Delete: ";
@@ -137,16 +160,28 @@ void display_help() {
             cin >> choice_delete;
 
             delete_record(choice_delete);
+            Data::print_data(*search_records(choice_delete));
 
         } else if (choice == "ser") {
             cout << "Enter Task Name: ";
             string choice_search;
             cin >> choice_search;
 
-            Data::print_data(search_records(choice_search));
+            Data::print_data(*search_records(choice_search));
+
+        } else if (choice == "com") {
+            cout << "Enter Task To Complete: ";
+            string choice_complete;
+            cin >> choice_complete;
+
+            mark_complete(choice_complete);
+            Data::print_data(*search_records(choice_complete));
+
+        }
 
 
-        } else if (choice == "help") {
+
+        else if (choice == "help") {
             display_help();
         } else {
             cout << "Invalid Command, Type 'help' For Help" << endl;

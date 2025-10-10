@@ -6,7 +6,7 @@ Functions:
 
 Decomposition:
     Task?: Name, Description, Priority, Due Date
-    Storage Type?: Hash map? Hash Table? Database?
+    Storage Type?: Hash map
     Interface:
         Simple: CLI
         Advanced: GUI
@@ -75,6 +75,13 @@ Psuedocode:
         else
             print invalid message
         return time
+
+    mark_complete(query)
+        if query is in hash map
+            change task complete field to true
+        else
+            display not found message
+        print task
 
     main()
         Display help
