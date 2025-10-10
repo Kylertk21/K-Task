@@ -26,7 +26,7 @@ public:
         due_date = time(nullptr);
     }
 
-    static void print_data(const Data& passed_data) {
+    static void print_data(const Data& passed_data) { // print records
         const Data& data_to_print = passed_data;
         cout << "Name: " << data_to_print.name << endl;
         cout << "Description: " << data_to_print.description << endl;
@@ -81,7 +81,7 @@ optional<Data> search_records(const string& query) {
     return nullopt;
 }
 
-optional<time_t> convert_time(const string& time) {
+optional<time_t> convert_time(const string& time) { // convert cin to time_t
     tm converted_time = {};
     istringstream ss(time);
     ss >> get_time(&converted_time, "%m/%d/%Y");
@@ -98,7 +98,7 @@ optional<time_t> convert_time(const string& time) {
 
     const time_t date = mktime(&converted_time);
 
-    if (const tm* verified = localtime(&date); verified->tm_mday != converted_time.tm_mday ||
+    if (const tm* verified = localtime(&date); verified->tm_mday != converted_time.tm_mday || // verify time wasn't changed by mktime
                                                verified->tm_mon != converted_time.tm_mon ||
                                                verified->tm_year != converted_time.tm_year) {
         return nullopt;
@@ -108,7 +108,7 @@ optional<time_t> convert_time(const string& time) {
     return date;
 }
 
-void mark_complete(const string& query) {
+void mark_complete(const string& query) { // complete tasks
     if (const auto search = tasks.find(query); search != tasks.end()) {
          search->second.complete = true;
     } else {
@@ -121,7 +121,8 @@ void display_help() {
             "--> add to add a task              \n"
             "--> del to delete a task           \n"
             "--> ser to search for a task       \n"
-            "--> com to mark a task as complete \n";
+            "--> com to mark a task as complete \n"
+            "--> list to list all tasks         \n";
 }
 
 [[noreturn]] int main() {
@@ -177,9 +178,14 @@ void display_help() {
             mark_complete(choice_complete);
             Data::print_data(*search_records(choice_complete));
 
+        } else if (choice == "list") {
+            cout << "Listing tasks..." << endl;
+            if (!tasks.empty()) {
+                for (const auto &name: tasks | views::keys) {
+                    cout << name << endl;
+                }
+            }
         }
-
-
 
         else if (choice == "help") {
             display_help();
