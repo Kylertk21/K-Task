@@ -9,91 +9,56 @@
 #include <sstream>
 #include <optional>
 
+#include "linked_list.h"
+#include "data.h"
+
 using namespace std;
 
-class Data {
-public:
-    string name;
-    string description;
-    bool complete;
-    string priority;
-    time_t due_date;
-    Data() {
-        name = "";
-        description = "";
-        complete = false;
-        priority = "0";
-        due_date = time(nullptr);
-    }
+Node* priority_list;
+unordered_map<string, Data> tasks;
 
-    static void print_data(const Data& passed_data) { // print records
-        const Data& data_to_print = passed_data;
-        cout << "Name: " << data_to_print.name << endl;
-        cout << "Description: " << data_to_print.description << endl;
-        if (data_to_print.complete == 1) {
-            cout << "Complete: True" << endl;
-        } else {
-            cout << "Complete: False" << endl;
-        }
 
-        cout << "Priority: " << data_to_print.priority << endl;
-
-        char buffer[80];
-        const tm* timeinfo = localtime(&data_to_print.due_date);
-        strftime(buffer, sizeof(buffer), "%m/%d/%Y", timeinfo);
-        cout << "Due Date: " << buffer << endl;
-    }
-};
-
-struct Node {
-    Data task;
-    Node* next{};
-    Node* prev{};
-
-    Node(Data task) {
-        this->task = task;
-        this->next = nullptr;
-        this->prev = nullptr;
-
-    }
-};
-
-void insert_node_beginning(Node*& head, Data task) {
+void add_record_to_list(const Data& task) {
     Node* new_node = new Node(task);
 
-    if (head == nullptr) { // check if empty
-        head == new_node;
+    if (priority_list == nullptr) { // empty list
+        priority_list = new_node; // add first node
         return;
     }
 
-    new_node->next = head; // update next and prev pointers to insert the new node at the beginning
-    head->prev = new_node;
-    head = new_node;
-}
+    Node* temp = priority_list;
 
-void insert_node_end(Node*& head, Data task) {
-    Node* new_node = new Node(task);
-
-    if (head == new_node) {
-        head == new_node;
+    if (task.priority > temp->task.priority) { // if new task has highest priority
+        insert_node_beginning(priority_list, task); // insert at beginning
         return;
     }
 
-    Node* temp = head; // traverse to last node of list
-    while (temp->next != nullptr) {
+    while (temp->next != nullptr && task.priority <= temp->next->task.priority) { // insert before next highest priority task
         temp = temp->next;
     }
 
-    temp->next
+    new_node->next = temp->next;
+    new_node->prev = temp;
 
+    if (temp->next != nullptr) {
+        temp->next->prev = new_node;
+    }
+
+    temp->next = new_node;
 
 }
 
-unordered_map<string, Data> tasks;
-
 void add_record(const string &name, const string &description, const bool complete, // add data struct to hash map
-                const string &priority, const time_t &due_date) {
+                const int &priority, const time_t &due_date) {
     Data new_task;
+
+    auto it = tasks.find(name);
+    if (it != tasks.end()) {
+        cout << "Name taken! choose a different name" << endl;
+        return;
+    }
+
+
     new_task.name = name;
     new_task.description = description;
     new_task.complete = complete;
@@ -101,6 +66,7 @@ void add_record(const string &name, const string &description, const bool comple
     new_task.due_date = due_date;
 
     tasks[new_task.name] = new_task;
+    add_record_to_list(new_task);
 
 }
 
@@ -113,6 +79,7 @@ void delete_record(const string& query) {
         choice = static_cast<char>(tolower(static_cast<unsigned char>(choice))); // converts char to lowercase with safety typecasting
         if (choice == 'y') {
             tasks.erase(search);
+            delete_node_by_query(priority_list, query);
             cout << "Deleted Task" << endl;
         }
     }
@@ -195,7 +162,7 @@ void display_help() {
             cin >> description;
 
             cout << "Enter Priority: ";
-            string priority;
+            int priority;
             cin >> priority;
 
             cout << "Enter Date Due: ";
@@ -203,8 +170,10 @@ void display_help() {
             cin >> date;
 
             if (convert_time(date) != nullopt) {
-                time_t due_date = convert_time(date).value();
-                add_record(name, description, false, priority, due_date);
+                    time_t due_date = convert_time(date).value();
+                    add_record(name, description, false, priority, due_date);
+                    print_list_order(priority_list);
+
             } else {
                 cerr << "Invalid Format For Date, Use MM/DD/YYYY" << endl;
             }
@@ -215,14 +184,18 @@ void display_help() {
             cin >> choice_delete;
 
             delete_record(choice_delete);
-            Data::print_data(*search_records(choice_delete));
+            print_list_order(priority_list);
 
         } else if (choice == "ser") {
             cout << "Enter Task Name: ";
             string choice_search;
             cin >> choice_search;
 
-            Data::print_data(*search_records(choice_search));
+            if (search_records(choice_search)  == nullopt) {
+                cout << "No task found by that name!" << endl;
+            } else {
+                Data::print_data(*search_records(choice_search));
+            }
 
         } else if (choice == "com") {
             cout << "Enter Task To Complete: ";
@@ -231,9 +204,10 @@ void display_help() {
 
             mark_complete(choice_complete);
             Data::print_data(*search_records(choice_complete));
+            print_list_order(priority_list);
 
         } else if (choice == "list") {
-
+            print_list_order(priority_list);
         }
 
         else if (choice == "help") {

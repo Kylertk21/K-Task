@@ -3,5 +3,16 @@ project(K_Task)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(K_Task main.cpp
-        main.cpp)
+add_executable(K_Task
+        main.cpp
+        linked_list.h
+        data.h
+        )
+
+add_executable(K_Task_Tests
+        tests.cpp
+        catch_amalgamated.hpp
+        catch_amalgamated.cpp
+        data.h
+        linked_list.h
+    )
