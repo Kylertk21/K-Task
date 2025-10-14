@@ -12,7 +12,6 @@ add_executable(K_Task
 add_executable(K_Task_Tests
         tests.cpp
         catch_amalgamated.hpp
-        catch_amalgamated.cpp
         data.h
         linked_list.h
     )
